@@ -2,7 +2,7 @@ import { Link, Outlet } from "react-router-dom";
 
 const SettingsLayout = () => {
   return (
-    <main className="flex">
+    <div className="flex">
       <aside className="w-96 flex flex-col p-4">
         <h1 className="text-4xl font-bold my-8">Settings</h1>
         <ul className="flex flex-col">
@@ -12,7 +12,7 @@ const SettingsLayout = () => {
         </ul>
       </aside>
       <Outlet />
-    </main>
+    </div>
   );
 };
 

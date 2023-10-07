@@ -66,13 +66,14 @@ func (payload AuthPayload) IsTokenValid(token string, authSessionCollection *mon
 
 func (payload AuthPayload) addTokenToStore(token string, authSessionCollection *mongo.Collection) error {
 	authSession := AuthSession{
-		Username:    payload.Username,
-		Email:       payload.Email,
-		Token:       token,
-		Permissions: payload.Permissions,
-		CreatedAt:   time.Now().Unix(),
-		ExpiresAt:   time.Now().Add(config.TokenExpiration).Unix(),
-		Client:      "web",
+		Username:          payload.Username,
+		Email:             payload.Email,
+		Token:             token,
+		Permissions:       payload.Permissions,
+		CreatedAt:         time.Now().Unix(),
+		ExpiresAt:         time.Now().Add(config.TokenExpiration).Unix(),
+		Client:            "web",
+		SelectedLogLevels: []string{"error"},
 	}
 	_, err := authSessionCollection.InsertOne(context.TODO(), authSession)
 	if err != nil {

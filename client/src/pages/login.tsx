@@ -45,7 +45,9 @@ const LoginPage = () => {
             {...register("password")}
           />
         </div>
-        <button type="submit">Login</button>
+        <button className="btn btn-sm" type="submit">
+          Login
+        </button>
       </form>
     </div>
   );

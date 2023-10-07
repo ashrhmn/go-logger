@@ -4,4 +4,12 @@ import { defineConfig } from "vite";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  build: {
+    assetsDir: "___assets___",
+  },
+  server: {
+    hmr: {
+      clientPort: 5173,
+    },
+  },
 });

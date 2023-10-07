@@ -23,7 +23,7 @@ const RootLayout = () => {
     localStorage.setItem("theme", theme);
   };
   return (
-    <main>
+    <main className="p-4">
       <div className="fixed top-0 right-0">
         <Dropdown
           items={themes.map((theme) => () => (

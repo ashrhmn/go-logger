@@ -7,6 +7,7 @@ import "./index.css";
 import DashboardLayout from "./layouts/dashboard-layout";
 import RootLayout from "./layouts/root";
 import SettingsLayout from "./layouts/settings-layout";
+import DashboardHome from "./pages/dashboard-home";
 import LoginPage from "./pages/login";
 import ManageUsers from "./pages/settings/manage-users";
 
@@ -22,15 +23,20 @@ const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <DashboardLayout />,
-        children: [],
-      },
-      {
-        path: "settings",
-        element: <SettingsLayout />,
         children: [
           {
-            path: "manage-users",
-            element: <ManageUsers />,
+            path: "",
+            element: <DashboardHome />,
+          },
+          {
+            path: "settings",
+            element: <SettingsLayout />,
+            children: [
+              {
+                path: "manage-users",
+                element: <ManageUsers />,
+              },
+            ],
           },
         ],
       },

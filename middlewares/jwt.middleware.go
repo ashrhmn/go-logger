@@ -7,9 +7,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+func GetAuthTokenFromRequest(c *fiber.Ctx) string {
+	return c.Cookies(constants.AUTH_TOKEN_ONE_KEY) + "." + c.Cookies(constants.AUTH_TOKEN_TWO_KEY) + "." + c.Cookies(constants.AUTH_TOKEN_THREE_KEY)
+}
+
 func AuthCookieMiddleware(authSessionCollection *mongo.Collection) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		token := c.Cookies(constants.AUTH_TOKEN_ONE_KEY) + "." + c.Cookies(constants.AUTH_TOKEN_TWO_KEY) + "." + c.Cookies(constants.AUTH_TOKEN_THREE_KEY)
+		token := GetAuthTokenFromRequest(c)
 		user, err := types.AuthPayloadFromToken(token, authSessionCollection)
 		if err != nil {
 			return c.Next()

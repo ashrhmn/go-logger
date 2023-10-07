@@ -1,23 +1,33 @@
 package auth
 
 import (
+	"context"
+
+	"github.com/ashrhmn/go-logger/modules/logging"
 	"github.com/ashrhmn/go-logger/modules/storage"
 	"github.com/ashrhmn/go-logger/modules/user"
 	"github.com/ashrhmn/go-logger/types"
 	"github.com/ashrhmn/go-logger/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type AuthService struct {
 	userService     user.UserService
+	loggingService  logging.LoggingService
 	mongoCollection storage.MongoCollection
 }
 
-func newAuthService(userService user.UserService, mongoCollection storage.MongoCollection) AuthService {
+func newAuthService(
+	userService user.UserService,
+	mongoCollection storage.MongoCollection,
+	loggingService logging.LoggingService,
+) AuthService {
 	return AuthService{
 		userService:     userService,
 		mongoCollection: mongoCollection,
+		loggingService:  loggingService,
 	}
 }
 
@@ -46,4 +56,16 @@ func (as AuthService) Login(loginInput LoginInput) (token string, err error) {
 		return "", fiber.ErrInternalServerError
 	}
 	return token, nil
+}
+
+func (as AuthService) Logout(token string) error {
+	_, err := as.mongoCollection.AuthSessionCollection.DeleteOne(
+		context.Background(),
+		bson.D{{Key: "token", Value: token}},
+	)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	return nil
 }

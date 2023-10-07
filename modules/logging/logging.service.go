@@ -5,41 +5,71 @@ import (
 	"fmt"
 
 	"github.com/ashrhmn/go-logger/modules/storage"
+	"github.com/ashrhmn/go-logger/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 type LoggingService struct {
-	mongo storage.Mongo
+	mongo           storage.Mongo
+	mongoCollection storage.MongoCollection
 }
 
-func newLoggingService(mongo storage.Mongo) LoggingService {
+func newLoggingService(mongo storage.Mongo, mongoCollection storage.MongoCollection) LoggingService {
 	return LoggingService{
-		mongo: mongo,
+		mongo:           mongo,
+		mongoCollection: mongoCollection,
 	}
 }
 
-func (ls LoggingService) Log() {
+func (ls LoggingService) GetLogLevels() ([]string, error) {
 
-	cursor, err := ls.mongo.Client.Database("users").Collection("test").Find(
-		context.Background(),
-		bson.D{{Key: "$or", Value: bson.A{
-			bson.D{{Key: "email", Value: "hdupoy1@blogtalkradio.com"}},
-			bson.D{{Key: "first_name", Value: "Cathryn"}},
-		}}},
-	)
+	levels := []string{}
+
+	dbLevels, err := ls.mongoCollection.LogCollection.Distinct(context.Background(), "level", bson.D{})
 	if err != nil {
 		fmt.Println(err)
-		return
+		return levels, err
 	}
-
-	var results []map[string]interface{}
-	if err = cursor.All(context.Background(), &results); err != nil {
-		fmt.Println(err)
-		return
+	for _, level := range dbLevels {
+		levelStr, ok := level.(string)
+		if ok {
+			levels = append(levels, levelStr)
+		} else {
+			fmt.Println("level is not a string", level)
+		}
 	}
+	return levels, nil
+}
 
-	for _, result := range results {
-		fmt.Println(result["email"])
+func (ls LoggingService) GetSelectedLogLevel(token string) ([]string, error) {
+	var authSession types.AuthSession
+	err := ls.mongoCollection.AuthSessionCollection.FindOne(context.Background(), bson.D{{
+		Key:   "token",
+		Value: token,
+	}}).Decode(&authSession)
+	if err != nil {
+		return []string{}, err
 	}
+	return authSession.SelectedLogLevels, nil
+}
 
+func (ls LoggingService) UpdateSelectedLogLevel(token string, logLevels []string) error {
+	// var authSession types.AuthSession
+	// err := ls.mongoCollection.AuthSessionCollection.FindOne(context.Background(), bson.D{{
+	// 	Key:   "token",
+	// 	Value: token,
+	// }}).Decode(&authSession)
+	// if err != nil {
+	// 	return err
+	// }
+	// authSession.SelectedLogLevels = logLevels
+	_, err := ls.mongoCollection.AuthSessionCollection.UpdateOne(
+		context.Background(),
+		bson.D{{Key: "token", Value: token}},
+		bson.D{{Key: "$set", Value: bson.D{{Key: "selectedLogLevels", Value: logLevels}}}},
+	)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"os"
 	"strings"
 	"time"
 
@@ -19,7 +20,7 @@ type UserService struct {
 }
 
 func newUserService(mongoCollection storage.MongoCollection) UserService {
-	ensureAdminUser(mongoCollection)
+	go ensureAdminUser(mongoCollection)
 	return UserService{
 		mongoCollection: mongoCollection,
 	}
@@ -78,7 +79,12 @@ func ensureAdminUser(mongoCollection storage.MongoCollection) {
 		return
 	}
 
-	password, err := utils.HashPassword("admin")
+	plainPassword := os.Getenv("ADMIN_PASSWORD")
+	if plainPassword == "" {
+		plainPassword = "admin"
+	}
+
+	password, err := utils.HashPassword(plainPassword)
 	if err != nil {
 		panic(err)
 	}

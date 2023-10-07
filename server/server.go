@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ashrhmn/go-logger/constants"
+	"github.com/ashrhmn/go-logger/guards"
 	"github.com/ashrhmn/go-logger/middlewares"
 	"github.com/ashrhmn/go-logger/modules/storage"
 	"github.com/ashrhmn/go-logger/types"
@@ -19,6 +20,14 @@ import (
 type Server struct {
 	app *fiber.App
 }
+
+// var proxyClient = filesystem.New(filesystem.Config{
+// 	Root:         http.Dir("./client/dist"),
+// 	Browse:       true,
+// 	Index:        "index.html",
+// 	NotFoundFile: "404.html",
+// 	MaxAge:       3600,
+// })
 
 func proxyClient(c *fiber.Ctx) error {
 	path := c.Path()
@@ -45,6 +54,9 @@ func newServer(controllers []types.Controller, mongoCollection storage.MongoColl
 	for _, controller := range controllers {
 		controller.RegisterRoutes(api)
 	}
+	app.Get("/login", guards.NoneLoggedIn("/dashboard"), proxyClient)
+	app.Get("/dashboard", guards.AnyLoggedIn("/login"), proxyClient)
+	app.Get("/dashboard/*", guards.AnyLoggedIn("/login"), proxyClient)
 	app.Get("/*", proxyClient)
 	return &Server{
 		app: app,

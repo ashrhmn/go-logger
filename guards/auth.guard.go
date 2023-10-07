@@ -3,6 +3,7 @@ package guards
 import (
 	"slices"
 
+	"github.com/ashrhmn/go-logger/constants"
 	"github.com/ashrhmn/go-logger/middlewares"
 	"github.com/gofiber/fiber/v2"
 )
@@ -44,6 +45,9 @@ func WithPermission(permission string, redirect string) fiber.Handler {
 			}
 			return err
 		}
+		if slices.Contains(user.Permissions, constants.PermissionAdmin) {
+			return c.Next()
+		}
 		if !slices.Contains(user.Permissions, permission) {
 			if redirect != "" {
 				return c.Redirect(redirect)
@@ -62,6 +66,9 @@ func WithAnyPermission(permissions []string, redirect string) fiber.Handler {
 				return c.Redirect(redirect)
 			}
 			return err
+		}
+		if slices.Contains(user.Permissions, constants.PermissionAdmin) {
+			return c.Next()
 		}
 		for _, permission := range permissions {
 			if slices.Contains(user.Permissions, permission) {
@@ -83,6 +90,9 @@ func WithAllPermissions(permissions []string, redirect string) fiber.Handler {
 				return c.Redirect(redirect)
 			}
 			return err
+		}
+		if slices.Contains(user.Permissions, constants.PermissionAdmin) {
+			return c.Next()
 		}
 		for _, permission := range permissions {
 			if !slices.Contains(user.Permissions, permission) {
