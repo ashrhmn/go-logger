@@ -9,6 +9,7 @@ import (
 const AuthTokenCookieName = "Authorization"
 const AuthTokenHeaderName = "Authorization"
 const TokenExpiration = time.Hour * 72
+const ENV_KEY = "GO_ENV"
 
 func GetAuthTokenCookieOptions(token string) fiber.Cookie {
 	return fiber.Cookie{

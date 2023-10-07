@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -17,8 +18,12 @@ type Mongo struct {
 const uri = "mongodb://localhost:27017/test?w=majority"
 
 func newMongo(lc fx.Lifecycle) Mongo {
+	mongoUri := os.Getenv("MONGO_URI")
+	if mongoUri == "" {
+		mongoUri = uri
+	}
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI(uri).SetServerAPIOptions(serverAPI)
+	opts := options.Client().ApplyURI(mongoUri).SetServerAPIOptions(serverAPI)
 
 	client, err := mongo.Connect(context.TODO(), opts)
 	if err != nil {

@@ -3,9 +3,11 @@ package server
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 
+	"github.com/ashrhmn/go-logger/config"
 	"github.com/ashrhmn/go-logger/constants"
 	"github.com/ashrhmn/go-logger/guards"
 	"github.com/ashrhmn/go-logger/middlewares"
@@ -13,6 +15,7 @@ import (
 	"github.com/ashrhmn/go-logger/types"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
+	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
 	"go.uber.org/fx"
 )
@@ -21,15 +24,10 @@ type Server struct {
 	app *fiber.App
 }
 
-// var proxyClient = filesystem.New(filesystem.Config{
-// 	Root:         http.Dir("./client/dist"),
-// 	Browse:       true,
-// 	Index:        "index.html",
-// 	NotFoundFile: "404.html",
-// 	MaxAge:       3600,
-// })
-
 func proxyClient(c *fiber.Ctx) error {
+	if os.Getenv(config.ENV_KEY) == "production" {
+		return c.SendFile("./views/index.html")
+	}
 	path := c.Path()
 	proxyBaseUrl := os.Getenv("PROXY_BASE_URL")
 	if proxyBaseUrl == "" {
@@ -54,10 +52,19 @@ func newServer(controllers []types.Controller, mongoCollection storage.MongoColl
 	for _, controller := range controllers {
 		controller.RegisterRoutes(api)
 	}
+
+	if os.Getenv(config.ENV_KEY) == "production" {
+		app.Use("/___assets___", filesystem.New(filesystem.Config{
+			Root:   http.Dir("./views/___assets___"),
+			Browse: false,
+			MaxAge: 3600,
+		}))
+	}
+
 	app.Get("/login", guards.NoneLoggedIn("/dashboard"), proxyClient)
 	app.Get("/dashboard", guards.AnyLoggedIn("/login"), proxyClient)
 	app.Get("/dashboard/*", guards.AnyLoggedIn("/login"), proxyClient)
-	app.Get("/*", proxyClient)
+	app.Get("*", proxyClient)
 	return &Server{
 		app: app,
 	}
