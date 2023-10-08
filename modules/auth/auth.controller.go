@@ -91,4 +91,11 @@ func (ac AuthController) RegisterRoutes(app fiber.Router) {
 			return c.SendStatus(201)
 		},
 	)
+
+	auth.Get(
+		"/permissions",
+		func(c *fiber.Ctx) error {
+			return c.JSON(ac.authService.GetAllPermissions())
+		},
+	)
 }

@@ -3,10 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import md5 from "md5";
+import DeleteUserModal from "../../components/Settings/ManageUsers/DeleteUserModal";
 import EditUserForm from "../../components/Settings/ManageUsers/EditUserForm";
+import { clx } from "../../utils/jsx.utils";
 
 const ManageUsers = () => {
-  const { data: users } = useQuery({
+  const { data: users, refetch: refetchUsers } = useQuery({
     queryKey: ["users"],
     queryFn: () => axios.get("/api/users").then((res) => res.data),
   });
@@ -15,7 +17,7 @@ const ManageUsers = () => {
     <div className="">
       <h1>Manage Users</h1>
       <div className="max-h-[80vh] w-full overflow-x-auto">
-        <table className="table table-xs table-pin-rows table-pin-cols overflow-x-auto">
+        <table className="table table-xs table-zebra table-pin-rows table-pin-cols overflow-x-auto">
           <thead>
             <tr>
               <th></th>
@@ -24,10 +26,9 @@ const ManageUsers = () => {
               <td>Avatar</td>
               <td>Name</td>
               <td>Permissions</td>
-              <td>Created By</td>
               <td>Created At</td>
-              <td>Last Updated By</td>
               <td>Last Updated At</td>
+              <td>Deleted At</td>
               <td>Actions</td>
               <th></th>
             </tr>
@@ -40,7 +41,7 @@ const ManageUsers = () => {
                 <td>{user.email}</td>
                 <td>
                   <img
-                    className="w-10 h-10 rounded-full"
+                    className="w-6 h-6 rounded-full"
                     src={`https://www.gravatar.com/avatar/${md5(
                       user.email
                     )}?s=2048`}
@@ -49,11 +50,14 @@ const ManageUsers = () => {
                 </td>
                 <td>{user.firstName + " " + user.lastName}</td>
                 <td>{user.permissions.join(", ")}</td>
-                <td>{user.createdBy}</td>
                 <td>{new Date(user.createdAt * 1000).toLocaleString()}</td>
-                <td>{user.updatedBy}</td>
                 <td>{new Date(user.updatedAt * 1000).toLocaleString()}</td>
-                <td className="flex items-center gap-1">
+                <td>
+                  {user.deletedAt !== 0
+                    ? new Date(user.deletedAt * 1000).toLocaleString()
+                    : ""}
+                </td>
+                <td className="flex justify-center gap-1">
                   <button
                     onClick={() =>
                       (
@@ -62,16 +66,27 @@ const ManageUsers = () => {
                         ) as HTMLDialogElement
                       )?.showModal()
                     }
-                    className="btn btn-sm btn-accent"
+                    className="btn btn-xs btn-accent"
                   >
                     Edit
                   </button>
-                  <button className="btn btn-sm btn-warning">
-                    {user.deletedAt === 0 ? "Delete" : "Delete Permanently"}
+                  <button
+                    onClick={() =>
+                      (
+                        document.getElementById(
+                          `user_delete_modal_${user.id}`
+                        ) as HTMLDialogElement
+                      )?.showModal()
+                    }
+                    className={clx(
+                      "btn btn-xs",
+                      user.deletedAt !== 0 ? "btn-error" : "btn-warning"
+                    )}
+                  >
+                    Delete
                   </button>
                 </td>
                 <th>{i + 1}</th>
-                <EditUserForm user={user} />
               </tr>
             ))}
           </tbody>
@@ -83,16 +98,21 @@ const ManageUsers = () => {
               <td>Avatar</td>
               <td>Name</td>
               <td>Permissions</td>
-              <td>Created By</td>
               <td>Created At</td>
-              <td>Last Updated By</td>
               <td>Last Updated At</td>
+              <td>Deleted At</td>
               <td>Actions</td>
               <th></th>
             </tr>
           </tfoot>
         </table>
       </div>
+      {users?.map((user: any, i: number) => (
+        <div key={i}>
+          <EditUserForm user={user} refetchUsers={refetchUsers} />
+          <DeleteUserModal user={user} refetchUsers={refetchUsers} />
+        </div>
+      ))}
     </div>
   );
 };

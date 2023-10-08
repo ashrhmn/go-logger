@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 
+	"github.com/ashrhmn/go-logger/constants"
 	"github.com/ashrhmn/go-logger/modules/logging"
 	"github.com/ashrhmn/go-logger/modules/storage"
 	"github.com/ashrhmn/go-logger/modules/user"
@@ -57,6 +58,10 @@ func (as AuthService) Login(loginInput LoginInput) (token string, err error) {
 		return "", fiber.ErrInternalServerError
 	}
 	return token, nil
+}
+
+func (as AuthService) GetAllPermissions() []string {
+	return constants.PermissionsAll
 }
 
 func (as AuthService) Logout(token string) error {

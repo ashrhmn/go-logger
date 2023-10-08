@@ -17,13 +17,6 @@ const DashboardLayout = () => {
       )}?s=2048`,
     [loggedInUser?.email]
   );
-  // const avatarUrl = useMemo(
-  //   () =>
-  //     loggedInUser?.email && typeof loggedInUser.email === "string"
-  //       ? `https://www.gravatar.com/avatar/${md5(loggedInUser.email)}?s=2048`
-  //       : "https://www.tenforums.com/geek/gars/images/2/types/thumb_15951118880user.png",
-  //   [loggedInUser?.email]
-  // );
 
   const handleLogout = () =>
     axios.delete("/api/auth").then(() => navigate("/login"));
@@ -52,7 +45,7 @@ const DashboardLayout = () => {
             </label>
             <ul
               tabIndex={0}
-              className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
+              className="mt-3 z-[10] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
             >
               <li>
                 <a className="justify-between">

@@ -41,7 +41,7 @@ const LoginPage = () => {
           </label>
           <input
             className="input input-bordered w-full"
-            type="text"
+            type="password"
             {...register("password")}
           />
         </div>

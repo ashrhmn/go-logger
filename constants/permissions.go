@@ -8,3 +8,12 @@ const (
 	PermissionAdmin            = "ADMIN"
 	PermissionViewLogs         = "VIEW_LOGS"
 )
+
+var PermissionsAll = []string{
+	PermissionAddUser,
+	PermissionModifyUser,
+	PermissionViewUsers,
+	PermissionModifyPermission,
+	PermissionAdmin,
+	PermissionViewLogs,
+}
