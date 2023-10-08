@@ -25,10 +25,14 @@ type Server struct {
 }
 
 func proxyClient(c *fiber.Ctx) error {
+	path := c.Path()
 	if os.Getenv(config.ENV_KEY) == "production" {
+		parts := strings.Split(strings.Split(path, "?")[0], "/")
+		if strings.Contains(parts[len(parts)-1], ".") {
+			return c.SendFile(fmt.Sprintf("./views%s", path))
+		}
 		return c.SendFile("./views/index.html")
 	}
-	path := c.Path()
 	proxyBaseUrl := os.Getenv("PROXY_BASE_URL")
 	if proxyBaseUrl == "" {
 		proxyBaseUrl = "http://localhost:5173"
