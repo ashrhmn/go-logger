@@ -6,6 +6,7 @@ require (
 	github.com/go-playground/validator/v10 v10.15.4
 	github.com/gofiber/fiber/v2 v2.49.2
 	github.com/google/uuid v1.3.1
+	github.com/rabbitmq/amqp091-go v1.9.0
 	go.mongodb.org/mongo-driver v1.12.1
 	go.uber.org/fx v1.20.0
 	golang.org/x/crypto v0.7.0

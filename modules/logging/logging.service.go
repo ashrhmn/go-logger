@@ -64,3 +64,11 @@ func (ls LoggingService) UpdateSelectedLogLevel(token string, logLevels []string
 	}
 	return nil
 }
+
+func (ls LoggingService) InsertLog(logData types.AppLog) error {
+	_, err := ls.mongoCollection.LogCollection.InsertOne(context.Background(), logData)
+	if err != nil {
+		return err
+	}
+	return nil
+}
