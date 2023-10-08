@@ -46,6 +46,7 @@ func (as AuthService) Login(loginInput LoginInput) (token string, err error) {
 		return "", fiber.NewError(fiber.StatusUnauthorized, "Invalid username or password")
 	}
 	payload := types.AuthPayload{
+		ID:          user.ID,
 		Username:    user.Username,
 		Email:       user.Email,
 		Permissions: user.Permissions,

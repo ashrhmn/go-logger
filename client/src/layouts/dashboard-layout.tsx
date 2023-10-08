@@ -12,11 +12,18 @@ const DashboardLayout = () => {
   });
   const avatarUrl = useMemo(
     () =>
-      loggedInUser?.email && typeof loggedInUser.email === "string"
-        ? `https://www.gravatar.com/avatar/${md5(loggedInUser.email)}?s=2048`
-        : "https://www.tenforums.com/geek/gars/images/2/types/thumb_15951118880user.png",
+      `https://www.gravatar.com/avatar/${md5(
+        loggedInUser?.email || "ghost@email.com"
+      )}?s=2048`,
     [loggedInUser?.email]
   );
+  // const avatarUrl = useMemo(
+  //   () =>
+  //     loggedInUser?.email && typeof loggedInUser.email === "string"
+  //       ? `https://www.gravatar.com/avatar/${md5(loggedInUser.email)}?s=2048`
+  //       : "https://www.tenforums.com/geek/gars/images/2/types/thumb_15951118880user.png",
+  //   [loggedInUser?.email]
+  // );
 
   const handleLogout = () =>
     axios.delete("/api/auth").then(() => navigate("/login"));
@@ -39,7 +46,7 @@ const DashboardLayout = () => {
           </div>
           <div className="dropdown dropdown-end">
             <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-              <div className="w-10 rounded-full flex justify-center items-center">
+              <div className="w-10 h-10 rounded-full flex justify-center items-center">
                 <img src={avatarUrl} />
               </div>
             </label>

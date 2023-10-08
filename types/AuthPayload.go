@@ -9,13 +9,15 @@ import (
 	"github.com/ashrhmn/go-logger/config"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type AuthPayload struct {
-	Username    string   `json:"username"`
-	Email       string   `json:"email"`
-	Permissions []string `json:"permissions"`
+	ID          primitive.ObjectID `bson:"_id" json:"id,omitempty"`
+	Username    string             `json:"username"`
+	Email       string             `json:"email"`
+	Permissions []string           `json:"permissions"`
 }
 
 func AuthPayloadFromToken(token string, authSessionCollection *mongo.Collection) (AuthPayload, error) {
@@ -27,6 +29,7 @@ func AuthPayloadFromToken(token string, authSessionCollection *mongo.Collection)
 		return AuthPayload{}, err
 	}
 	return AuthPayload{
+		ID:          authSession.ID,
 		Username:    authSession.Username,
 		Email:       authSession.Email,
 		Permissions: authSession.Permissions,
@@ -36,8 +39,7 @@ func AuthPayloadFromToken(token string, authSessionCollection *mongo.Collection)
 func (payload AuthPayload) GetValidTokens(authSessionCollection *mongo.Collection) ([]string, error) {
 
 	cursor, err := authSessionCollection.Find(context.Background(), AuthSession{
-		Username: payload.Username,
-		Email:    payload.Email,
+		ID: payload.ID,
 	})
 	if err != nil {
 		return nil, err
@@ -66,6 +68,7 @@ func (payload AuthPayload) IsTokenValid(token string, authSessionCollection *mon
 
 func (payload AuthPayload) addTokenToStore(token string, authSessionCollection *mongo.Collection) error {
 	authSession := AuthSession{
+		ID:                primitive.NewObjectID(),
 		Username:          payload.Username,
 		Email:             payload.Email,
 		Token:             token,
@@ -84,9 +87,8 @@ func (payload AuthPayload) addTokenToStore(token string, authSessionCollection *
 
 func (payload AuthPayload) RevokeToken(token string, authSessionCollection *mongo.Collection) error {
 	_, err := authSessionCollection.DeleteOne(context.TODO(), AuthSession{
-		Username: payload.Username,
-		Email:    payload.Email,
-		Token:    token,
+		ID:    payload.ID,
+		Token: token,
 	})
 	if err != nil {
 		return err
@@ -96,8 +98,7 @@ func (payload AuthPayload) RevokeToken(token string, authSessionCollection *mong
 
 func (payload AuthPayload) RevokeAllTokens(authSessionCollection *mongo.Collection) error {
 	_, err := authSessionCollection.DeleteMany(context.TODO(), AuthSession{
-		Username: payload.Username,
-		Email:    payload.Email,
+		ID: payload.ID,
 	})
 	if err != nil {
 		return err

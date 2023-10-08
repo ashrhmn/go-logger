@@ -4,7 +4,11 @@ import daisy from "daisyui";
 export default {
   content: ["src/**/*.tsx"],
   theme: {
-    extend: {},
+    extend: {
+      screens: {
+        xs: "400px",
+      },
+    },
   },
   plugins: [daisy],
   daisyui: {

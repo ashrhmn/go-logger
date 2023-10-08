@@ -54,15 +54,6 @@ func (ls LoggingService) GetSelectedLogLevel(token string) ([]string, error) {
 }
 
 func (ls LoggingService) UpdateSelectedLogLevel(token string, logLevels []string) error {
-	// var authSession types.AuthSession
-	// err := ls.mongoCollection.AuthSessionCollection.FindOne(context.Background(), bson.D{{
-	// 	Key:   "token",
-	// 	Value: token,
-	// }}).Decode(&authSession)
-	// if err != nil {
-	// 	return err
-	// }
-	// authSession.SelectedLogLevels = logLevels
 	_, err := ls.mongoCollection.AuthSessionCollection.UpdateOne(
 		context.Background(),
 		bson.D{{Key: "token", Value: token}},

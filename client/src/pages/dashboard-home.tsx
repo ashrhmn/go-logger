@@ -43,7 +43,7 @@ const DashboardHome = () => {
           {logLevels?.map((level) => (
             <div
               key={level}
-              className="form-control w-20 bg-base-300 rounded p-1 text-sm"
+              className="form-control w-36 bg-base-300 rounded p-1 text-sm"
             >
               <label className="label cursor-pointer">
                 <span className="label-text">{level.toUpperCase()}</span>

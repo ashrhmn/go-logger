@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func ExtractLimitOffset(c *fiber.Ctx) (int32, int32) {
+func ExtractLimitOffset(c *fiber.Ctx) (int64, int64) {
 	limit, err := strconv.Atoi(c.Query("limit"))
 	if err != nil {
 		limit = 10
@@ -17,5 +17,5 @@ func ExtractLimitOffset(c *fiber.Ctx) (int32, int32) {
 		offset = 0
 	}
 
-	return int32(limit), int32(offset)
+	return int64(limit), int64(offset)
 }
