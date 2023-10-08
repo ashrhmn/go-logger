@@ -19,18 +19,18 @@ type Consumer struct {
 }
 
 func newConsumer(queueConfig types.QueueConfig, loggingService logging.LoggingService) Consumer {
-	var connection *amqp.Connection
-	var channel *amqp.Channel
 	return Consumer{
 		start: func() {
 			connection, err := amqp.Dial(queueConfig.Url)
 			if err != nil {
 				panic(err)
 			}
+			defer connection.Close()
 			channel, err := connection.Channel()
 			if err != nil {
 				panic(err)
 			}
+			defer channel.Close()
 			_, err = channel.QueueDeclare(
 				queueConfig.QueueName,
 				false,
@@ -55,17 +55,14 @@ func newConsumer(queueConfig types.QueueConfig, loggingService logging.LoggingSe
 				panic(err)
 			}
 			for msg := range messages {
-				// log.Info("Received message: %s\n", msg.Body)
 				var logData types.AppLog
 				err := json.Unmarshal(msg.Body, &logData)
 				if err != nil {
 					log.Error("Error unmarshalling message")
 					return
 				}
-				// log.Info("Successfully unmarshalled message")
 				logData.ID = primitive.NewObjectID()
 				logData.Timestamp = time.Now().Unix()
-				// log.Info(logData)
 				err = loggingService.InsertLog(logData)
 				if err != nil {
 					log.Error("Error inserting log")
@@ -75,9 +72,6 @@ func newConsumer(queueConfig types.QueueConfig, loggingService logging.LoggingSe
 		},
 		stop: func() {
 			log.Info("Stopping consuming messages")
-			channel.Close()
-			connection.Close()
-			log.Info("Successfully disconnected from RabbitMQ instance")
 		},
 	}
 }
