@@ -76,7 +76,7 @@ func (payload AuthPayload) addTokenToStore(token string, authSessionCollection *
 		CreatedAt:         time.Now().Unix(),
 		ExpiresAt:         time.Now().Add(config.TokenExpiration).Unix(),
 		Client:            "web",
-		SelectedLogLevels: []string{"error"},
+		SelectedLogLevels: []string{},
 	}
 	_, err := authSessionCollection.InsertOne(context.TODO(), authSession)
 	if err != nil {

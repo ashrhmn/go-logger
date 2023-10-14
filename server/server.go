@@ -7,12 +7,14 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ashrhmn/go-logger/channels"
 	"github.com/ashrhmn/go-logger/config"
 	"github.com/ashrhmn/go-logger/constants"
 	"github.com/ashrhmn/go-logger/guards"
 	"github.com/ashrhmn/go-logger/middlewares"
 	"github.com/ashrhmn/go-logger/modules/storage"
 	"github.com/ashrhmn/go-logger/types"
+	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
@@ -49,7 +51,12 @@ func proxyClient(c *fiber.Ctx) error {
 	return nil
 }
 
-func newServer(controllers []types.Controller, mongoCollection storage.MongoCollection) *Server {
+func newServer(
+	controllers []types.Controller,
+	mongoCollection storage.MongoCollection,
+	appChannel channels.AppChannel,
+	wsConnectionPool storage.WsPool,
+) *Server {
 	app := fiber.New()
 	app.Use(middlewares.AuthCookieMiddleware(mongoCollection.AuthSessionCollection))
 	api := app.Group("/api")
@@ -74,7 +81,12 @@ func newServer(controllers []types.Controller, mongoCollection storage.MongoColl
 	}
 }
 
-func startServer(s *Server, lc fx.Lifecycle) {
+func startServer(
+	s *Server,
+	appChannel channels.AppChannel,
+	wsConnectionPool storage.WsPool,
+	lc fx.Lifecycle,
+) {
 	lc.Append(fx.Hook{
 		OnStart: func(context.Context) error {
 			go func() {
@@ -83,6 +95,17 @@ func startServer(s *Server, lc fx.Lifecycle) {
 					panic(err)
 				}
 			}()
+			go func(connections *map[string]*websocket.Conn) {
+				for {
+					logData := <-appChannel.LogStream
+					for _, c := range *connections {
+						if err := c.WriteJSON(logData); err != nil {
+							log.Error("write:", err)
+							continue
+						}
+					}
+				}
+			}(&wsConnectionPool.Connections)
 			return nil
 		},
 		OnStop: func(context.Context) error {

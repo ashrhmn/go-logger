@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import md5 from "md5";
+import AddUserModal from "../../components/Settings/ManageUsers/AddUserModal";
 import DeleteUserModal from "../../components/Settings/ManageUsers/DeleteUserModal";
 import EditUserForm from "../../components/Settings/ManageUsers/EditUserForm";
 import { clx } from "../../utils/jsx.utils";
@@ -15,7 +14,20 @@ const ManageUsers = () => {
 
   return (
     <div className="">
-      <h1>Manage Users</h1>
+      <AddUserModal />
+      <div className="flex justify-between items-center my-10">
+        <h1 className="text-xl font-bold">Manage Users</h1>
+        <button
+          onClick={() =>
+            (
+              document.getElementById(`user_add_modal`) as HTMLDialogElement
+            )?.showModal()
+          }
+          className="btn btn-sm btn-primary"
+        >
+          Add New User
+        </button>
+      </div>
       <div className="max-h-[80vh] w-full overflow-x-auto">
         <table className="table table-xs table-zebra table-pin-rows table-pin-cols overflow-x-auto">
           <thead>

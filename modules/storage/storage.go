@@ -2,4 +2,11 @@ package storage
 
 import "go.uber.org/fx"
 
-var Module = fx.Module("storage", fx.Provide(newMongo, newMongoCollection))
+var Module = fx.Module(
+	"storage",
+	fx.Provide(
+		newMongo,
+		newMongoCollection,
+		newWsPool,
+	),
+)

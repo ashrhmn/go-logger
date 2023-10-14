@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/ashrhmn/go-logger/channels"
 	"github.com/ashrhmn/go-logger/modules/logging"
 	"github.com/ashrhmn/go-logger/types"
 	"github.com/gofiber/fiber/v2/log"
@@ -18,7 +19,11 @@ type Consumer struct {
 	stop  func()
 }
 
-func newConsumer(queueConfig types.QueueConfig, loggingService logging.LoggingService) Consumer {
+func newConsumer(
+	queueConfig types.QueueConfig,
+	loggingService logging.LoggingService,
+	appChannel channels.AppChannel,
+) Consumer {
 	return Consumer{
 		start: func() {
 			connection, err := amqp.Dial(queueConfig.Url)
@@ -59,15 +64,18 @@ func newConsumer(queueConfig types.QueueConfig, loggingService logging.LoggingSe
 				err := json.Unmarshal(msg.Body, &logData)
 				if err != nil {
 					log.Error("Error unmarshalling message")
-					return
+					continue
 				}
 				logData.ID = primitive.NewObjectID()
 				logData.Timestamp = time.Now().Unix()
 				err = loggingService.InsertLog(logData)
 				if err != nil {
 					log.Error("Error inserting log")
-					return
+					continue
 				}
+				go func() {
+					appChannel.LogStream <- logData
+				}()
 			}
 		},
 		stop: func() {

@@ -7,6 +7,7 @@ import (
 	"github.com/ashrhmn/go-logger/modules/storage"
 	"github.com/ashrhmn/go-logger/types"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type LoggingService struct {
@@ -71,4 +72,45 @@ func (ls LoggingService) InsertLog(logData types.AppLog) error {
 		return err
 	}
 	return nil
+}
+
+func (ls LoggingService) GetLogs(
+	logLevels []string,
+	from int64,
+	to int64,
+	limit int64,
+	offset int64,
+) ([]types.AppLog, error) {
+	var logs []types.AppLog
+	filter := bson.D{
+		{
+			Key:   "level",
+			Value: bson.D{{Key: "$in", Value: logLevels}},
+		},
+		{
+			Key:   "timestamp",
+			Value: bson.D{{Key: "$gte", Value: from}},
+		},
+		{
+			Key:   "timestamp",
+			Value: bson.D{{Key: "$lte", Value: to}},
+		},
+	}
+	cursor, err := ls.mongoCollection.LogCollection.Find(
+		context.Background(),
+		filter,
+		&options.FindOptions{
+			Limit: &limit,
+			Skip:  &offset,
+			Sort:  bson.D{{Key: "timestamp", Value: -1}},
+		},
+	)
+	if err != nil {
+		return logs, err
+	}
+	err = cursor.All(context.Background(), &logs)
+	if err != nil {
+		return logs, err
+	}
+	return logs, nil
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/ashrhmn/go-logger/channels"
 	"github.com/ashrhmn/go-logger/consumer"
 	"github.com/ashrhmn/go-logger/modules"
 	"github.com/ashrhmn/go-logger/server"
@@ -31,6 +32,6 @@ func main() {
 		consumer.Module,
 		modules.Register,
 		fx.NopLogger,
-		fx.Provide(ConstructQueueConfig),
+		fx.Provide(ConstructQueueConfig, channels.NewAppChannel),
 	).Run()
 }
