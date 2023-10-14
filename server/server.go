@@ -100,7 +100,7 @@ func startServer(
 					logData := <-appChannel.LogStream
 					for _, c := range *connections {
 						if err := c.WriteJSON(logData); err != nil {
-							log.Error("write:", err)
+							// log.Error("write:", err)
 							continue
 						}
 					}

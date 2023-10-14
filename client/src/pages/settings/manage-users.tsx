@@ -8,7 +8,7 @@ import { clx } from "../../utils/jsx.utils";
 
 const ManageUsers = () => {
   const { data: users, refetch: refetchUsers } = useQuery({
-    queryKey: ["users"],
+    queryKey: ["all-users"],
     queryFn: () => axios.get("/api/users").then((res) => res.data),
   });
 

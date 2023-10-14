@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import z from "zod";
@@ -17,6 +18,7 @@ const formSchema = z.object({
 type IFormData = z.infer<typeof formSchema>;
 
 const AddUserModal = () => {
+  const queryClient = useQueryClient();
   const { register, handleSubmit } = useForm<IFormData>({
     resolver: zodResolver(formSchema),
   });
@@ -29,6 +31,7 @@ const AddUserModal = () => {
             document.getElementById(`user_add_modal`) as HTMLDialogElement
           )?.close()
         )
+        .then(() => queryClient.invalidateQueries(["all-users"]))
         .catch(handleError)
     );
   return (
@@ -88,7 +91,7 @@ const AddUserModal = () => {
               />
             </div>
           </div>
-          <button type="submit" className="btn btn-sm btn-primary">
+          <button type="submit" className="btn btn-sm btn-primary mt-3">
             Add User
           </button>
         </form>

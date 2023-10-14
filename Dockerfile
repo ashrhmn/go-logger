@@ -19,6 +19,6 @@ COPY --from=app-builder /main /main
 COPY --from=ui-builder /app/dist /views
 EXPOSE 8080
 ENV GO_ENV=production
-ENV MONGO_URI="mongodb://host.docker.internal:27017/test?w=majority"
-ENV RMQ_URL="amqp://guest:guest@host.docker.internal:5672/"
+# ENV MONGO_URI="mongodb://host.docker.internal:27017/test?w=majority"
+# ENV RMQ_URL="amqp://guest:guest@host.docker.internal:5672/"
 ENTRYPOINT [ "/main" ]
