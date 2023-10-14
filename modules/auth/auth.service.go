@@ -12,6 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type AuthService struct {
@@ -36,7 +37,10 @@ func (as AuthService) Login(loginInput LoginInput) (token string, err error) {
 	user, err := as.userService.GetUserByEmailOrUsername(loginInput.UsernameOrEmail)
 	if err != nil {
 		log.Error(err)
-		return "", fiber.ErrInternalServerError
+		if err == mongo.ErrNoDocuments {
+			return "", fiber.NewError(fiber.StatusUnauthorized, "Invalid username or password")
+		}
+		return "", err
 	}
 
 	match, err := utils.ComparePasswordAndHash(loginInput.Password, user.Password)

@@ -1,9 +1,12 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { formatHtmlDateTime } from "../utils/str.utils";
 
 const DashboardHome = () => {
   const [limit, setLimit] = useState(40);
+  const [from, setFrom] = useState(~~(Date.now() / 1000) - 60 * 60 * 6);
+  const [to, setTo] = useState(~~(Date.now() / 1000));
   const queryClient = useQueryClient();
   const { data: logLevels } = useQuery({
     queryKey: ["all-log-levels"],
@@ -42,8 +45,8 @@ const DashboardHome = () => {
   );
 
   const logQueryKey = useMemo(
-    () => ["logs", commaSeparatedSelectedLogLevels, limit],
-    [commaSeparatedSelectedLogLevels, limit]
+    () => ["logs", commaSeparatedSelectedLogLevels, limit, from, to],
+    [commaSeparatedSelectedLogLevels, from, limit, to]
   );
 
   const { data: logs } = useQuery({
@@ -51,13 +54,13 @@ const DashboardHome = () => {
     queryFn: () =>
       axios
         .get("/api/logging/logs", {
-          params: { levels: commaSeparatedSelectedLogLevels, limit },
+          params: { levels: commaSeparatedSelectedLogLevels, limit, from, to },
         })
         .then((res) => res.data),
     keepPreviousData: true,
   });
 
-  console.log({ logs });
+  // console.log({ logs });
 
   const onLogMessage = useCallback(
     (log: any) => {
@@ -76,17 +79,17 @@ const DashboardHome = () => {
         window.location.host
       }/api/socket/ws/logs`
     );
-    ws.onopen = () => {
-      console.log("connected");
-    };
+    // ws.onopen = () => {
+    //   console.log("connected");
+    // };
     ws.onmessage = (e) => {
       const log = JSON.parse(e.data);
-      console.log(log);
+      // console.log(log);
       onLogMessage(log);
     };
-    ws.onclose = () => {
-      console.log("disconnected");
-    };
+    // ws.onclose = () => {
+    //   console.log("disconnected");
+    // };
     return () => {
       ws.close();
     };
@@ -94,14 +97,35 @@ const DashboardHome = () => {
 
   return (
     <div>
-      <div className="my-8">
+      <div className="my-2">
         <h1 className="text-4xl font-bold my-4">Logs</h1>
+        <h1>Range</h1>
+        <div className="flex gap-2 flex-wrap items-center">
+          <label className="label">From</label>
+          <input
+            className="input input-sm input-bordered"
+            type="datetime-local"
+            value={formatHtmlDateTime(new Date(from * 1000))}
+            onChange={(e) =>
+              setFrom(~~(new Date(e.target.value).valueOf() / 1000))
+            }
+          />
+          <label className="label">To</label>
+          <input
+            className="input input-sm input-bordered"
+            type="datetime-local"
+            value={formatHtmlDateTime(new Date(to * 1000))}
+            onChange={(e) =>
+              setTo(~~(new Date(e.target.value).valueOf() / 1000))
+            }
+          />
+        </div>
         <h1>Filters</h1>
-        <div className="flex gap-3 flex-wrap items-center">
+        <div className="flex gap-2 flex-wrap items-center">
           {logLevels?.map((level) => (
             <div
               key={level}
-              className="form-control w-36 bg-base-300 rounded p-1 text-sm"
+              className="form-control min-w-[7rem] bg-base-300 rounded p-1 text-sm"
             >
               <label className="label cursor-pointer">
                 <span className="label-text">{level.toUpperCase()}</span>
@@ -118,10 +142,10 @@ const DashboardHome = () => {
           ))}
         </div>
       </div>
-      <div className="w-full h-[60vh] overflow-y-auto flex flex-col-reverse p-4">
+      <div className="w-full h-[60vh] overflow-y-auto flex flex-col-reverse p-4 bg-base-200 rounded">
         {logs?.map((log: any) => (
-          <details open key={log.id}>
-            <summary className="flex items-center justify-between">
+          <details className="m-1" open key={log.id}>
+            <summary className="flex items-center justify-between cursor-pointer">
               <div className="text-sm text-gray-500 flex items-center gap-3">
                 <span>{new Date(log.timestamp * 1000).toLocaleString()}</span>
                 {!!log.context && <span>Context : {log.context}</span>}

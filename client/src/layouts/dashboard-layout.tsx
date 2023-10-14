@@ -50,7 +50,7 @@ const DashboardLayout = () => {
               <li>
                 <a className="justify-between">
                   Profile
-                  <span className="badge">Soon</span>
+                  <span className="badge">Coming Soon</span>
                 </a>
               </li>
               <li>

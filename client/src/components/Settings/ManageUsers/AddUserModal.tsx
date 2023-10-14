@@ -7,11 +7,11 @@ import { handleError } from "../../../utils/error.utils";
 import { promiseToast } from "../../../utils/toast.utils";
 
 const formSchema = z.object({
-  username: z.string(),
-  password: z.string(),
-  email: z.string(),
-  firstName: z.string(),
-  lastName: z.string(),
+  username: z.string().min(1, "Required"),
+  password: z.string().min(1, "Required"),
+  email: z.string().email().min(1, "Required"),
+  firstName: z.string().min(1, "Required"),
+  lastName: z.string().min(1, "Required"),
 });
 
 type IFormData = z.infer<typeof formSchema>;

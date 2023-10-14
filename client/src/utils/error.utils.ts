@@ -3,7 +3,7 @@ import { z } from "zod";
 import { ZodUtils } from "./zod.utils";
 
 const badRequestExceptionMessageSchema = z.object({
-  response: z.object({ data: z.object({ message: z.string() }) }),
+  response: z.object({ data: z.string() }),
 });
 
 const errorSchema = z.object({ message: z.string() });
@@ -44,7 +44,7 @@ export const extractError = (error: unknown) => {
   if (!error) return "No error occurred";
 
   if (hasBadRequestExceptionMessage(error))
-    return mapError(error.response.data.message);
+    return mapError(error.response.data);
   else if (hasErrorMessage(error)) return mapError(error.message);
   else if (typeof error === "string") return mapError(error);
   else return "An unknown error occurred";
