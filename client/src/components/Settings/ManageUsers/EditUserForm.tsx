@@ -42,7 +42,7 @@ const EditUserForm = ({
       .catch(handleError);
 
   return (
-    <dialog id={`user_edit_modal_${user.id}`} className="modal relative">
+    <dialog id={`user_edit_modal_${user.id}`} className="modal">
       <div className="modal-box">
         <h3 className="font-bold text-lg">Edit User</h3>
         <form onSubmit={handleSubmit(handleUpdateUser)}>

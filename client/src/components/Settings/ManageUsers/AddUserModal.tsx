@@ -36,7 +36,7 @@ const AddUserModal = () => {
     );
   return (
     <dialog id={`user_add_modal`} className="modal">
-      <div className="modal-box relative">
+      <div className="modal-box">
         <h3 className="font-bold text-lg mt-6">Add New User</h3>
         <form onSubmit={handleSubmit(handleAddUser)}>
           <div>

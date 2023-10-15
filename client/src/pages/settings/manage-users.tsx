@@ -120,10 +120,10 @@ const ManageUsers = () => {
         </table>
       </div>
       {users?.map((user: any, i: number) => (
-        <div key={i}>
-          <EditUserForm user={user} refetchUsers={refetchUsers} />
-          <DeleteUserModal user={user} refetchUsers={refetchUsers} />
-        </div>
+        <>
+          <EditUserForm key={i} user={user} refetchUsers={refetchUsers} />
+          <DeleteUserModal key={i} user={user} refetchUsers={refetchUsers} />
+        </>
       ))}
     </div>
   );

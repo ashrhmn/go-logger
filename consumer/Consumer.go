@@ -38,7 +38,7 @@ func newConsumer(
 			defer channel.Close()
 			_, err = channel.QueueDeclare(
 				queueConfig.QueueName,
-				false,
+				true,
 				false,
 				false,
 				false,

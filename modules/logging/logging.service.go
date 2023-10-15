@@ -80,8 +80,10 @@ func (ls LoggingService) GetLogs(
 	to int64,
 	limit int64,
 	offset int64,
-) ([]types.AppLog, error) {
+) ([]types.AppLog, int64, bool, error) {
 	var logs []types.AppLog
+	var count int64
+	var hasMore bool
 	filter := bson.D{
 		{
 			Key:   "level",
@@ -96,6 +98,10 @@ func (ls LoggingService) GetLogs(
 			Value: bson.D{{Key: "$lte", Value: to}},
 		},
 	}
+	count, err := ls.mongoCollection.LogCollection.CountDocuments(context.Background(), filter)
+	if err != nil {
+		return logs, count, hasMore, err
+	}
 	cursor, err := ls.mongoCollection.LogCollection.Find(
 		context.Background(),
 		filter,
@@ -106,11 +112,12 @@ func (ls LoggingService) GetLogs(
 		},
 	)
 	if err != nil {
-		return logs, err
+		return logs, count, hasMore, err
 	}
 	err = cursor.All(context.Background(), &logs)
 	if err != nil {
-		return logs, err
+		return logs, count, hasMore, err
 	}
-	return logs, nil
+	hasMore = int(count) > len(logs)
+	return logs, count, hasMore, nil
 }

@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import LogItem from "../components/LogItem";
 import { formatHtmlDateTime } from "../utils/str.utils";
 
 const DashboardHome = () => {
@@ -49,7 +50,7 @@ const DashboardHome = () => {
     [commaSeparatedSelectedLogLevels, from, limit, to]
   );
 
-  const { data: logs } = useQuery({
+  const { data: logResult } = useQuery({
     queryKey: logQueryKey,
     queryFn: () =>
       axios
@@ -60,15 +61,13 @@ const DashboardHome = () => {
     keepPreviousData: true,
   });
 
-  // console.log({ logs });
-
   const onLogMessage = useCallback(
     (log: any) => {
       if (!selectedLogLevels?.includes(log.level)) return;
-      queryClient.setQueryData(logQueryKey, (oldLogs: any) => [
-        log,
-        ...(oldLogs || []),
-      ]);
+      queryClient.setQueryData(logQueryKey, (oldLogResult: any) => ({
+        ...(oldLogResult || {}),
+        logs: [log, ...(oldLogResult?.logs || [])],
+      }));
     },
     [logQueryKey, queryClient, selectedLogLevels]
   );
@@ -79,17 +78,10 @@ const DashboardHome = () => {
         window.location.host
       }/api/socket/ws/logs`
     );
-    // ws.onopen = () => {
-    //   console.log("connected");
-    // };
     ws.onmessage = (e) => {
       const log = JSON.parse(e.data);
-      // console.log(log);
       onLogMessage(log);
     };
-    // ws.onclose = () => {
-    //   console.log("disconnected");
-    // };
     return () => {
       ws.close();
     };
@@ -98,9 +90,8 @@ const DashboardHome = () => {
   return (
     <div>
       <div className="my-2">
-        <h1 className="text-4xl font-bold my-4">Logs</h1>
-        <h1>Range</h1>
         <div className="flex gap-2 flex-wrap items-center">
+          <h1 className="text-4xl font-bold my-4">Logs</h1>
           <label className="label">From</label>
           <input
             className="input input-sm input-bordered"
@@ -143,22 +134,12 @@ const DashboardHome = () => {
         </div>
       </div>
       <div className="w-full h-[60vh] overflow-y-auto flex flex-col-reverse p-4 bg-base-200 rounded">
-        {logs?.map((log: any) => (
-          <details className="m-1" open key={log.id}>
-            <summary className="flex items-center justify-between cursor-pointer">
-              <div className="text-sm text-gray-500 flex items-center gap-3">
-                <span>{new Date(log.timestamp * 1000).toLocaleString()}</span>
-                {!!log.context && <span>Context : {log.context}</span>}
-                {!!log.note && <span>Note : {log.note}</span>}
-              </div>
-              <div className="text-sm text-gray-500">{log.level}</div>
-            </summary>
-            <pre className="text-sm text-gray-500">
-              {JSON.stringify(log.payload, null, 2)}
-            </pre>
-          </details>
+        {logResult?.logs?.map((log: any) => (
+          <LogItem key={log.id} log={log} />
         ))}
-        <button onClick={() => setLimit((l) => l + 10)}>Load More</button>
+        {logResult?.hasMore && (
+          <button onClick={() => setLimit((l) => l + 10)}>Load More</button>
+        )}
       </div>
     </div>
   );

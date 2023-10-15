@@ -70,11 +70,15 @@ func (lc LoggingController) RegisterRoutes(app fiber.Router) {
 				return fiber.NewError(fiber.StatusBadRequest, "Bad Request, Invalid to Timestamp")
 			}
 
-			logs, err := lc.loggingService.GetLogs(levels, fromTimestamp, toTimestamp, limit, offset)
+			logs, count, hasMore, err := lc.loggingService.GetLogs(levels, fromTimestamp, toTimestamp, limit, offset)
 			if err != nil {
 				return err
 			}
-			return c.JSON(logs)
+			return c.JSON(fiber.Map{
+				"logs":    logs,
+				"count":   count,
+				"hasMore": hasMore,
+			})
 		},
 	)
 

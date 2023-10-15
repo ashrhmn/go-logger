@@ -25,7 +25,7 @@ const DeleteUserModal = ({
       .then(refetchUsers)
       .catch(handleError);
   return (
-    <dialog id={`user_delete_modal_${user.id}`} className="modal relative">
+    <dialog id={`user_delete_modal_${user.id}`} className="modal">
       <div className="modal-box">
         <h3 className="font-bold text-lg mt-6">
           Are you sure you want to delete the user
