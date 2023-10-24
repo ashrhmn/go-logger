@@ -4,7 +4,7 @@ services:
   app:
     image: ashrhmn/go-logger
     ports:
-      - "4000:4000"
+      - "4000:4000" # Log UI
     restart: on-failure
     environment:
       - MONGO_URI=mongodb://db:27017
@@ -17,4 +17,5 @@ services:
   rmq:
     image: rabbitmq:3-management
     ports:
-      - "15672:15672"
+      - "15672:15672" # RMQ UI (optional)
+      - "5672:5672" # RMQ (Post log messages here)
