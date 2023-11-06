@@ -1,7 +1,7 @@
 version: "3.7"
 
 services:
-  app:
+  go-logger:
     image: ashrhmn/go-logger
     ports:
       - "4000:4000" # Log UI
